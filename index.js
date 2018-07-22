@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 const Sequelize = require('sequelize')
+const Op = Sequelize.Op
+const moment = require('moment')
 /*const sequelize = new Sequelize('database','username','password',{
   dialect: 'sqlite',
   storage: './database.sqlite'
@@ -31,8 +33,6 @@ app.use(cors())
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-
-
 app.get('/', (req, res) => {
     let result = {
         status: 200,
@@ -42,36 +42,63 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/tweets', (req, res) =>{
-    let result = {
-        status: 200,
-        datas: tweets
-    }
-    res.json(result)
+    let tweets = []
+    let result = {}
+    Tweet.findAll().then((datas)=>{
+      tweets =  datas;
+      result = {
+          status: 200,
+          datas: tweets
+      }
+      res.json(result)
+    },(err)=>{
+      result = {
+        status: 500,
+        message: "internal server error"
+      }
+      res.json(result)
+    })
 })
 
 app.post('/api/tweets', (req, res) =>{
     let data = req.body
     console.log(data)
-    tweets.push(data)
-    let result = {
-        status: 200,
-        message: "success insert tweet"
-    }
-    res.json(result)
+    let tweet = Tweet.create({
+      name: data.name,
+      message: data.message,
+      created: moment().format("YYYY-MM-DD HH:mm:ss")
+    }).then(()=>{
+      let result = {
+          status: 200,
+          message: "success insert tweet"
+      }
+      res.json(result)
+    },(err)=>{
+      let result = {
+          status: 500,
+          message: "internal server error"
+      }
+      res.json(result)
+    })
 })
 
 app.get('/api/search', (req, res) =>{
     let q = req.query.q
-    let result = {
-        status: 200,
-        datas: []
-    }
-    tweets.forEach((tweet) =>{
-        if(tweet.message.indexOf(q) > -1){
-            result.datas.push(tweet)
+    let tweets = []
+    Tweet.findAll({
+      where: {
+        message: {
+          [Op.like] : "%"+q+"%"
         }
+      }
+    }).then((datas)=>{
+      tweets = datas
+      let result = {
+          status: 200,
+          datas: tweets
+      }
+      res.json(result)
     })
-    res.json(result)
 })
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
