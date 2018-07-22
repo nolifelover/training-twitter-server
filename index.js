@@ -1,5 +1,28 @@
 const express = require('express')
 const app = express()
+const Sequelize = require('sequelize')
+/*const sequelize = new Sequelize('database','username','password',{
+  dialect: 'sqlite',
+  storage: './database.sqlite'
+})*/
+//connect to sqlite database
+const sequelize = new Sequelize('sqlite:./database.sqlite')
+//define model and table
+const Tweet = sequelize.define('tweets',{
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement:true,
+    unique: true
+  },
+  name: Sequelize.STRING,
+  message: Sequelize.STRING,
+  created: Sequelize.STRING
+})
+
+//create table
+sequelize.sync()
+
 var bodyParser = require('body-parser');
 var multer = require('multer'); // v1.0.5
 var cors = require('cors');
@@ -7,24 +30,8 @@ var upload = multer(); // for parsing multipart/form-data
 app.use(cors())
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-/*app.use((req,res,next) =>{
-    console.log("on "+req);
-    next();
-})*/
-var tweets = [
-    {
-        id: 1,
-        name: "@nolifelover",
-        message: "hello world twitter 1 #hello #world",
-        created: "2018-07-22 12:07:20"
-    },
-    {
-        id: 2,
-        name: "@nolifelover",
-        message: "hello world twitter 2 #nodejs #memory",
-        created: "2018-07-22 12:10:20"
-    }
-]
+
+
 
 app.get('/', (req, res) => {
     let result = {
