@@ -1,5 +1,16 @@
 const express = require('express')
 const app = express()
+var bodyParser = require('body-parser');
+var multer = require('multer'); // v1.0.5
+var cors = require('cors');
+var upload = multer(); // for parsing multipart/form-data
+app.use(cors())
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+/*app.use((req,res,next) =>{
+    console.log("on "+req);
+    next();
+})*/
 var tweets = [
     {
         id: 1,
@@ -33,6 +44,7 @@ app.get('/api/tweets', (req, res) =>{
 
 app.post('/api/tweets', (req, res) =>{
     let data = req.body
+    console.log(data)
     tweets.push(data)
     let result = {
         status: 200,
